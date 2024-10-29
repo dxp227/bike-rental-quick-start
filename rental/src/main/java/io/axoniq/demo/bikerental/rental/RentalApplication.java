@@ -42,7 +42,11 @@ public class RentalApplication {
 
         ScheduledExecutorService scheduledExecutorService = Executors.newScheduledThreadPool(5);
         IntervalRetryScheduler rs = IntervalRetryScheduler.builder().retryExecutor(scheduledExecutorService).maxRetryCount(5).retryInterval(1000).build();
-        return DefaultCommandGateway.builder().commandBus(commandBus).retryScheduler(rs).build();
+        return DefaultCommandGateway
+            .builder()
+            .commandBus(commandBus)
+//            .retryScheduler(rs)
+            .build();
     }
 
 
