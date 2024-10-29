@@ -14,7 +14,9 @@ import io.axoniq.demo.bikerental.coreapi.rental.RequestRejectedEvent;
 import io.axoniq.demo.bikerental.coreapi.rental.ReturnBikeCommand;
 import org.axonframework.commandhandling.CommandHandler;
 import org.axonframework.eventsourcing.EventSourcingHandler;
+import org.axonframework.modelling.command.AggregateCreationPolicy;
 import org.axonframework.modelling.command.AggregateIdentifier;
+import org.axonframework.modelling.command.CreationPolicy;
 import org.axonframework.spring.stereotype.Aggregate;
 
 import java.time.Instant;
@@ -27,11 +29,7 @@ import static org.axonframework.modelling.command.AggregateLifecycle.apply;
 @Aggregate(snapshotTriggerDefinition = "bikeSnapshotDefinition") //<.>
 //end::SnapshotTriggerDefinition[]
 //tag::BikeAggregateClass[]
-public class Bike {
-
-    //tag::BikeAggregateFields[]
-    @AggregateIdentifier //<.>
-    private String bikeId;
+public class Bike extends BaseAggregate {
 
     private boolean isAvailable;
     private String reservedBy;
@@ -57,13 +55,11 @@ public class Bike {
 
     //tag::RegisterBikeCommandHandler[]
     @CommandHandler //<.>
-    public Bike(RegisterBikeCommand command) { //<.>
-        var seconds = Instant.now().getEpochSecond();
-        if (seconds % 5 ==0) {
-            throw new IllegalStateException("Can't accept new bikes right now");
-        }
-
+    @CreationPolicy(AggregateCreationPolicy.CREATE_IF_MISSING)
+    public String handle(RegisterBikeCommand command) { //<.>
         apply(new BikeRegisteredEvent(command.bikeId(), command.bikeType(), command.location())); //<.>
+
+        return command.bikeId();
     }
 
     //end::RegisterBikeCommandHandler[]
